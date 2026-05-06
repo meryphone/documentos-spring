@@ -15,15 +15,15 @@ public interface ServicioDocumentos {
 	 */
 	 String saveDocumento(String propietario, String contenido);
 	 	 
-	 Documento getDocumento(String id) throws EntidadNoEncontrada, ServicioExcepcion;
-	 
-	 void deleteDocumento(String id) throws ServicioExcepcion, EntidadNoEncontrada;
-	 
-	 List<Documento> getDocumentosPropietario(String propietario) throws EntidadNoEncontrada, ServicioExcepcion;
+	 Documento getDocumento(String id) throws EntidadNoEncontrada;
 
-	void addColaborardor(String id, String colaborardor) throws EntidadNoEncontrada, ServicioExcepcion;
+	 void deleteDocumento(String id) throws EntidadNoEncontrada;
 
-	void deleteColaborador(String id, String colaborador) throws EntidadNoEncontrada, ServicioExcepcion;
+	 List<Documento> getDocumentosPropietario(String propietario) throws EntidadNoEncontrada;
+
+	void addColaborardor(String id, String colaborardor) throws EntidadNoEncontrada;
+
+	void deleteColaborador(String id, String colaborador) throws EntidadNoEncontrada;
 	 
 		 
 

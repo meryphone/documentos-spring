@@ -6,12 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import dominio.Documento;
+import puertos.PuertoEntrada;
 import repositorios.EntidadNoEncontrada;
 import repositorios.RepositorioDocumentos;
-import repositorios.RepositorioDocumentosMongo;
 
 @Service
-public class ServicioDocumentosImpl implements ServicioDocumentos {
+public class ServicioDocumentosImpl implements ServicioDocumentos, PuertoEntrada {
 
 	private RepositorioDocumentos repoDocumentos;
 
@@ -34,77 +34,68 @@ public class ServicioDocumentosImpl implements ServicioDocumentos {
 	}
 
 	@Override
-	public Documento getDocumento(String id) throws ServicioExcepcion, EntidadNoEncontrada {
-		try {
+	public Documento getDocumento(String id) throws EntidadNoEncontrada {
+		if (id == null || id.isEmpty())
+			throw new IllegalArgumentException("El identificador no puede ser nulo ni vacío.");
 
-			Documento documento = repoDocumentos.findById(id)
-					.orElseThrow(() -> new EntidadNoEncontrada("El documento con id: " + id + "no existe."));
-
-			return documento;
-
-		} catch (IllegalArgumentException e) {
-			throw new ServicioExcepcion("Identificador no válido: " + id + ".");
-		}
-
+		return repoDocumentos.findById(id)
+				.orElseThrow(() -> new EntidadNoEncontrada("El documento con id: " + id + "no existe."));
 	}
 
 	@Override
-	public void deleteDocumento(String id) throws ServicioExcepcion, EntidadNoEncontrada {
-		try {
+	public void deleteDocumento(String id) throws EntidadNoEncontrada {
+		if (id == null || id.isEmpty())
+			throw new IllegalArgumentException("El identificador no puede ser nulo ni vacío.");
 
-			repoDocumentos.findById(id)
-					.orElseThrow(() -> new EntidadNoEncontrada("El documento con id: " + id + " no existe."));
-			
-			repoDocumentos.deleteById(id);
+		repoDocumentos.findById(id)
+				.orElseThrow(() -> new EntidadNoEncontrada("El documento con id: " + id + " no existe."));
 
-		} catch (IllegalArgumentException e) {
-			throw new ServicioExcepcion("Identificador no válido: " + id + ".");
-		}
-
+		repoDocumentos.deleteById(id);
 	}
 
 	@Override
-	public void addColaborardor(String id, String colaborardor) throws EntidadNoEncontrada, ServicioExcepcion {
-		try {
+	public void addColaborardor(String id, String colaborardor) throws EntidadNoEncontrada {
+		if (id == null || id.isEmpty())
+			throw new IllegalArgumentException("El identificador no puede ser nulo ni vacío.");
 
-			Documento documento = repoDocumentos.findById(id)
-					.orElseThrow(() -> new EntidadNoEncontrada("El documento con id: " + id + "no existe."));
-			
-			documento.addColaborador(colaborardor);
-			repoDocumentos.save(documento);
+		Documento documento = repoDocumentos.findById(id)
+				.orElseThrow(() -> new EntidadNoEncontrada("El documento con id: " + id + "no existe."));
 
-		} catch (IllegalArgumentException e) {
-			throw new ServicioExcepcion("Identificador no válido: " + id + ".");
-		}
-
+		documento.addColaborador(colaborardor);
+		repoDocumentos.save(documento);
 	}
 
 	@Override
-	public void deleteColaborador(String id, String colaborador) throws EntidadNoEncontrada, ServicioExcepcion {
-		try {
+	public void deleteColaborador(String id, String colaborador) throws EntidadNoEncontrada {
+		if (id == null || id.isEmpty())
+			throw new IllegalArgumentException("El identificador no puede ser nulo ni vacío.");
 
-			Documento documento = repoDocumentos.findById(id)
-					.orElseThrow(() -> new EntidadNoEncontrada("El documento con id: " + id + "no existe."));
-			
-			documento.deleteColaborador(colaborador);
-			repoDocumentos.save(documento);
+		Documento documento = repoDocumentos.findById(id)
+				.orElseThrow(() -> new EntidadNoEncontrada("El documento con id: " + id + "no existe."));
 
-		} catch (IllegalArgumentException e) {
-			throw new ServicioExcepcion("Identificador no válido: " + id + ".");
-		}
+		documento.deleteColaborador(colaborador);
+		repoDocumentos.save(documento);
 	}
 
 	@Override
-	public List<Documento> getDocumentosPropietario(String propietario) throws EntidadNoEncontrada, ServicioExcepcion{
-		try {
+	public List<Documento> getDocumentosPropietario(String propietario) throws EntidadNoEncontrada {
+		return repoDocumentos.findByPropietario(propietario);
+	}
 
-			List<Documento> documentos = repoDocumentos.findByPropietario(propietario);
-						
-			return documentos;
-
-		} catch (IllegalArgumentException e) {
-			throw new ServicioExcepcion("Identificador no válido: " + propietario + ".");
+	@Override
+	public void manejarUsuarioEliminado(String nombreUsuario) {
+		
+		if (nombreUsuario == null || nombreUsuario.isEmpty())
+			throw new IllegalArgumentException("El identificador no puede ser nulo ni vacío.");
+		
+		List<Documento> documentosAeliminar = repoDocumentos.findByPropietario(nombreUsuario);
+													
+		if(documentosAeliminar.isEmpty()) {
+			throw new EntidadNoEncontrada("El usuario no tenía documentos disponubles.")
 		}
+		
+		repoDocumentos.deleteAll(documentosAeliminar);
+		
 	}
 
 }
